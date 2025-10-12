@@ -25,6 +25,7 @@ type dbConfig struct {
 	maxOpenConns int
 	maxIdleConns int
 	maxIdleTime  string
+	env          string
 }
 
 func (app *application) mount() http.Handler {
