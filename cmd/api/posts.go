@@ -125,6 +125,11 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		post.Title = *payload.Title
 	}
 
+	if err := app.store.Posts.UpdatePost(r.Context(), post); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
 	if err := jsonResponse(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
 		return
