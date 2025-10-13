@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS commnets (
+CREATE TABLE IF NOT EXISTS comments (
     id BIGSERIAL PRIMARY KEY,
     content TEXT NOT NULL,
     post_id BIGINT NOT NULL,
