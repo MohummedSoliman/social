@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS commnets (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
