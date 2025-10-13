@@ -66,3 +66,58 @@ func (s *PostStore) GetPostByID(ctx context.Context, postID int) (*Post, error) 
 
 	return &post, nil
 }
+
+func (s *PostStore) DeletePostByID(ctx context.Context, postID int64) error {
+	// tx, err := s.db.BeginTx(ctx, nil)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// comments := &CommentStore{db: s.db}
+	// err = comments.DeleteCommentsByPostID(ctx, postID)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+
+	query := `DELETE FROM posts WHERE id = $1`
+	res, err := s.db.ExecContext(ctx, query, postID)
+	if err != nil {
+		// tx.Rollback()
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrNotFound
+	}
+
+	// if err := tx.Commit(); err != nil {
+	// 	return err
+	// }
+	return nil
+}
+
+func (s *PostStore) UpdatePost(ctx context.Context, post *Post) error {
+	query := `UPDATE posts SET content = $1 , title = $2 WHERE id = $3`
+
+	res, err := s.db.ExecContext(ctx, query, post.Content, post.Title, post.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}

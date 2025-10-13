@@ -55,3 +55,13 @@ func (c *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]*Commen
 	}
 	return comments, nil
 }
+
+func (c *CommentStore) DeleteCommentsByPostID(ctx context.Context, postID int64) error {
+	query := `DELETE FROM comments WHERE post_id := $1`
+
+	_, err := c.db.ExecContext(ctx, query, postID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
