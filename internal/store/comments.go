@@ -24,6 +24,9 @@ func (c *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]*Commen
 			  JOIN users ON c.user_id = users.id
 			  WHERE c.post_id = $1 ORDER BY c.created_at DESC`
 
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
 	var comments []*Comment
 	rows, err := c.db.QueryContext(ctx, query, postID)
 	if err != nil {
@@ -58,6 +61,9 @@ func (c *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]*Commen
 
 func (c *CommentStore) DeleteCommentsByPostID(ctx context.Context, postID int64) error {
 	query := `DELETE FROM comments WHERE post_id := $1`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
 
 	_, err := c.db.ExecContext(ctx, query, postID)
 	if err != nil {
