@@ -32,6 +32,7 @@ type Users interface {
 
 type Comments interface {
 	GetByPostID(context.Context, int64) ([]*Comment, error)
+	Create(context.Context, *Comment) error
 }
 
 func NewStorage(db *sql.DB) Storage {

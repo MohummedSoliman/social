@@ -71,3 +71,18 @@ func (c *CommentStore) DeleteCommentsByPostID(ctx context.Context, postID int64)
 	}
 	return nil
 }
+
+func (c *CommentStore) Create(ctx context.Context, comment *Comment) error {
+	stmt := `INSERT INTO comments (user_id, post_id, content)
+			 VALUES ($1, $2, $3)`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
+	_, err := c.db.ExecContext(ctx, stmt, comment.UserID, comment.PostID, comment.Content)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
