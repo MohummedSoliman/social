@@ -28,6 +28,7 @@ type Posts interface {
 
 type Users interface {
 	Create(context.Context, *User) error
+	GetUserByID(context.Context, int64) (*User, error)
 }
 
 type Comments interface {
