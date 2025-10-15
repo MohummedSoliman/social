@@ -25,6 +25,7 @@ type Posts interface {
 	GetPostByID(context.Context, int) (*Post, error)
 	DeletePostByID(context.Context, int64) error
 	UpdatePost(context.Context, *Post) error
+	GetUserFeed(context.Context, int64) ([]PostWithMetadata, error)
 }
 
 type Users interface {
