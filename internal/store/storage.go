@@ -14,9 +14,10 @@ var (
 )
 
 type Storage struct {
-	Posts    Posts
-	Users    Users
-	Comments Comments
+	Posts     Posts
+	Users     Users
+	Comments  Comments
+	Followers Followers
 }
 
 type Posts interface {
@@ -36,10 +37,16 @@ type Comments interface {
 	Create(context.Context, *Comment) error
 }
 
+type Followers interface {
+	Follow(ctx context.Context, followerID, userID int64) error
+	UnFollow(ctx context.Context, unfollowedID, userID int64) error
+}
+
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
-		Posts:    &PostStore{db},
-		Users:    &UserStore{db},
-		Comments: &CommentStore{db},
+		Posts:     &PostStore{db},
+		Users:     &UserStore{db},
+		Comments:  &CommentStore{db},
+		Followers: &FollowerStore{db},
 	}
 }
