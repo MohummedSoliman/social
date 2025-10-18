@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/MohummedSoliman/social/internal/db"
 	"github.com/MohummedSoliman/social/internal/env"
@@ -31,6 +32,9 @@ func main() {
 	app := &application{
 		config: config{
 			addr: env.GetString("ADDR", ":8080"),
+			mail: mailConfig{
+				expiry: time.Hour * 24 * 3,
+			},
 		},
 		db:    cfg,
 		store: store,
