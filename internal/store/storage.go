@@ -29,8 +29,10 @@ type Posts interface {
 }
 
 type Users interface {
-	Create(context.Context, *User) error
+	Create(context.Context, *sql.Tx, *User) error
 	GetUserByID(context.Context, int64) (*User, error)
+	CreateAndInviate(context.Context, *User, string, time.Duration) error
+	ActivateUser(ctx context.Context, token string) error
 }
 
 type Comments interface {
@@ -50,4 +52,21 @@ func NewStorage(db *sql.DB) Storage {
 		Comments:  &CommentStore{db},
 		Followers: &FollowerStore{db},
 	}
+}
+
+func WithTransaction(db *sql.DB, ctx context.Context, fn func(*sql.Tx) error) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	if err := fn(tx); err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+		return err
+	}
+
+	return tx.Commit()
 }
