@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	"github.com/MohummedSoliman/social/internal/store"
@@ -35,16 +36,21 @@ var comments = []string{
 
 const numberOfSeedData = 7
 
-func Seed(store store.Storage) {
+func Seed(store store.Storage, db *sql.DB) {
 	ctx := context.Background()
 
 	users := generateUsers()
+	tx, _ := db.BeginTx(ctx, nil)
+
 	for _, user := range users {
-		if err := store.Users.Create(ctx, user); err != nil {
+		if err := store.Users.Create(ctx, tx, user); err != nil {
+			_ = tx.Rollback()
 			log.Println("Error creating user", err)
 			return
 		}
 	}
+
+	tx.Commit()
 
 	posts := generatePosts(users)
 	for _, post := range posts {
@@ -99,7 +105,6 @@ func generateUsers() []*store.User {
 		users[i] = &store.User{
 			Username: usernames[i],
 			Email:    usernames[i] + "@example.com",
-			Password: "123123",
 		}
 	}
 	return users
