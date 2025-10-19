@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MohummedSoliman/social/internal/mailer"
 	"github.com/MohummedSoliman/social/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,15 +15,23 @@ type application struct {
 	config config
 	store  store.Storage
 	db     dbConfig
+	mailer mailer.Client
 }
 
 type config struct {
-	addr string
-	mail mailConfig
+	addr        string
+	mail        mailConfig
+	frontendURL string
 }
 
 type mailConfig struct {
-	expiry time.Duration
+	expiry   time.Duration
+	sendGrid sendGridConfig
+}
+
+type sendGridConfig struct {
+	apiKey    string
+	fromEmail string
 }
 
 type dbConfig struct {

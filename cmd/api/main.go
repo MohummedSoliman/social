@@ -6,6 +6,7 @@ import (
 
 	"github.com/MohummedSoliman/social/internal/db"
 	"github.com/MohummedSoliman/social/internal/env"
+	"github.com/MohummedSoliman/social/internal/mailer"
 	"github.com/MohummedSoliman/social/internal/store"
 )
 
@@ -20,6 +21,14 @@ func main() {
 		env:          env.GetString("ENV", "Development"),
 	}
 
+	mailCfg := mailConfig{
+		expiry: time.Hour * 24 * 3,
+		sendGrid: sendGridConfig{
+			apiKey:    env.GetString("SENDGRID_API_KEY", ""),
+			fromEmail: env.GetString("SENDGRID_FROM_EMAIL", ""),
+		},
+	}
+
 	db, err := db.New(cfg.addr, cfg.maxOpenConns, cfg.maxIdleConns, cfg.maxIdleTime)
 	if err != nil {
 		log.Panic(err)
@@ -29,15 +38,17 @@ func main() {
 
 	store := store.NewStorage(db)
 
+	mailer := mailer.NewSendgrid(mailCfg.sendGrid.apiKey, mailCfg.sendGrid.fromEmail)
+
 	app := &application{
 		config: config{
-			addr: env.GetString("ADDR", ":8080"),
-			mail: mailConfig{
-				expiry: time.Hour * 24 * 3,
-			},
+			addr:        env.GetString("ADDR", ":8080"),
+			mail:        mailCfg,
+			frontendURL: env.GetString("FRONTEND_URL", "http://localhost:4000"),
 		},
-		db:    cfg,
-		store: store,
+		db:     cfg,
+		store:  store,
+		mailer: mailer,
 	}
 
 	mux := app.mount()
