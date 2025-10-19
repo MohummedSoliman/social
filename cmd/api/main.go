@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/MohummedSoliman/social/internal/auth"
 	"github.com/MohummedSoliman/social/internal/db"
 	"github.com/MohummedSoliman/social/internal/env"
 	"github.com/MohummedSoliman/social/internal/mailer"
@@ -40,6 +41,15 @@ func main() {
 
 	mailer := mailer.NewSendgrid(mailCfg.sendGrid.apiKey, mailCfg.sendGrid.fromEmail)
 
+	token := tokenConfig{
+		secret: env.GetString("JWT_TOKEN_SECRET", ""),
+		exp:    time.Hour * 24 * 3,
+	}
+
+	jwtAuthenticator := auth.NewJWTAuthenticator(
+		token.secret, "GopherSocial", "GopherSocial",
+	)
+
 	app := &application{
 		config: config{
 			addr:        env.GetString("ADDR", ":8080"),
@@ -50,11 +60,13 @@ func main() {
 					user: env.GetString("AUTH_BASIC_USER", "admin"),
 					pass: env.GetString("AUTH_BASIC_PASS", "admin"),
 				},
+				token: token,
 			},
 		},
-		db:     cfg,
-		store:  store,
-		mailer: mailer,
+		db:            cfg,
+		store:         store,
+		mailer:        mailer,
+		authenticator: jwtAuthenticator,
 	}
 
 	mux := app.mount()
