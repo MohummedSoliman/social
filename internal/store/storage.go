@@ -33,6 +33,7 @@ type Users interface {
 	GetUserByID(context.Context, int64) (*User, error)
 	CreateAndInviate(context.Context, *User, string, time.Duration) error
 	ActivateUser(ctx context.Context, token string) error
+	Delete(context.Context, int64) error
 }
 
 type Comments interface {
