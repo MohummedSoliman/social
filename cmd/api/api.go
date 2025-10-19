@@ -22,6 +22,16 @@ type config struct {
 	addr        string
 	mail        mailConfig
 	frontendURL string
+	auth        authConfig
+}
+
+type authConfig struct {
+	basic basicConfig
+}
+
+type basicConfig struct {
+	user string
+	pass string
 }
 
 type mailConfig struct {
@@ -53,7 +63,7 @@ func (app *application) mount() http.Handler {
 	mux.Use(middleware.Timeout(60 * time.Second))
 
 	mux.Route("/v1", func(r chi.Router) {
-		r.Get("/health", app.healthCheckHandler)
+		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
 
 		r.Route("/users", func(r chi.Router) {
 			r.Put("/activate/{token}", app.activateUserHandler)

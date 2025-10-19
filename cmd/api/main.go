@@ -45,6 +45,12 @@ func main() {
 			addr:        env.GetString("ADDR", ":8080"),
 			mail:        mailCfg,
 			frontendURL: env.GetString("FRONTEND_URL", "http://localhost:4000"),
+			auth: authConfig{
+				basic: basicConfig{
+					user: env.GetString("AUTH_BASIC_USER", "admin"),
+					pass: env.GetString("AUTH_BASIC_PASS", "admin"),
+				},
+			},
 		},
 		db:     cfg,
 		store:  store,
