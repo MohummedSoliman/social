@@ -160,7 +160,7 @@ func (u *UserStore) deleteUserInvitation(ctx context.Context, tx *sql.Tx, userID
 }
 
 func (u *UserStore) update(ctx context.Context, tx *sql.Tx, user *User) error {
-	stmt := `UPDATE users SET is_active = TRUE WHERE id = $1`
+	stmt := `UPDATE users SET is_active = TRUE WHERE id = $1 AND is_active = true`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
@@ -241,4 +241,32 @@ func (u *UserStore) deleteUser(ctx context.Context, tx *sql.Tx, userID int64) er
 	}
 
 	return nil
+}
+
+func (u *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `SELECT id, username, email, created_at, is_active FROM users
+			  WHERE email = $1 AND is_active = true`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
+	var user User
+	row := u.db.QueryRowContext(ctx, query, email)
+	err := row.Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.CreatedAt,
+		&user.IsActive,
+	)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }

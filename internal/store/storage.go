@@ -34,6 +34,7 @@ type Users interface {
 	CreateAndInviate(context.Context, *User, string, time.Duration) error
 	ActivateUser(ctx context.Context, token string) error
 	Delete(context.Context, int64) error
+	GetByEmail(context.Context, string) (*User, error)
 }
 
 type Comments interface {
