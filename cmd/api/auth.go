@@ -11,7 +11,7 @@ import (
 	"github.com/MohummedSoliman/social/internal/mailer"
 	"github.com/MohummedSoliman/social/internal/store"
 	"github.com/go-chi/chi/v5"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -148,6 +148,12 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 		default:
 			app.internalServerError(w, r, err)
 		}
+		return
+	}
+
+	err = user.Password.Compare(payload.Password)
+	if err != nil {
+		app.unauthorizedError(w, r, err)
 		return
 	}
 
