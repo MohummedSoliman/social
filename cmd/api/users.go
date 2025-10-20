@@ -23,21 +23,15 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type FollowUser struct {
-	UserID int64 `json:"user_id"`
-}
-
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	followerUser := getUserFromContext(r)
-
-	var payload FollowUser
-	err := readJSON(w, r, &payload)
+	followedID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	err = app.store.Followers.Follow(r.Context(), followerUser.ID, payload.UserID)
+	err = app.store.Followers.Follow(r.Context(), followerUser.ID, followedID)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
@@ -52,14 +46,13 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 func (app *application) unFollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	unfollowedUser := getUserFromContext(r)
 
-	var payload FollowUser
-	err := readJSON(w, r, &payload)
+	unfollowedID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	err = app.store.Followers.UnFollow(r.Context(), unfollowedUser.ID, payload.UserID)
+	err = app.store.Followers.UnFollow(r.Context(), unfollowedUser.ID, unfollowedID)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
