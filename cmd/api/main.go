@@ -9,6 +9,8 @@ import (
 	"github.com/MohummedSoliman/social/internal/env"
 	"github.com/MohummedSoliman/social/internal/mailer"
 	"github.com/MohummedSoliman/social/internal/store"
+	"github.com/MohummedSoliman/social/internal/store/cache"
+	"github.com/go-redis/redis/v8"
 )
 
 const version = "0.0.1"
@@ -30,12 +32,25 @@ func main() {
 		},
 	}
 
+	redisConfig := redisConfig{
+		addr:     env.GetString("REDIS_ADDR", "localhost:6379"),
+		password: env.GetString("REDIS_PASS", ""),
+		db:       env.GetInt("REDIS_DB", 0),
+		enabled:  env.GetBool("REDIS_ENABLED", true),
+	}
+
 	db, err := db.New(cfg.addr, cfg.maxOpenConns, cfg.maxIdleConns, cfg.maxIdleTime)
 	if err != nil {
 		log.Panic(err)
 	}
 	defer db.Close()
 	log.Println("postgres connection pool establish sucessfully!!")
+
+	var rdsDB *redis.Client
+	if redisConfig.enabled {
+		rdsDB = cache.NewRedisClient(redisConfig.addr, redisConfig.password, redisConfig.db)
+		log.Println("redis connection establish successfully")
+	}
 
 	store := store.NewStorage(db)
 
@@ -62,9 +77,11 @@ func main() {
 				},
 				token: token,
 			},
+			redisConfig: redisConfig,
 		},
 		db:            cfg,
 		store:         store,
+		cacheStore:    cache.NewRedisStorage(rdsDB),
 		mailer:        mailer,
 		authenticator: jwtAuthenticator,
 	}

@@ -78,7 +78,8 @@ func (app *application) AuthTokenMiddleware() func(http.Handler) http.Handler {
 			}
 
 			ctx := r.Context()
-			user, err := app.store.Users.GetUserByID(ctx, int64(userID))
+
+			user, err := app.getUser(ctx, int64(userID))
 			if err != nil {
 				app.unauthorizedError(w, r, err)
 				return
@@ -122,4 +123,30 @@ func (app *application) checkRolePrecedence(ctx context.Context, user *store.Use
 	}
 
 	return user.Role.Level >= role.Level, nil
+}
+
+func (app *application) getUser(ctx context.Context, userID int64) (*store.User, error) {
+	if !app.config.redisConfig.enabled {
+		return app.store.Users.GetUserByID(ctx, int64(userID))
+	}
+
+	user, err := app.cacheStore.Users.Get(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// user does not exist in the cache.
+	if user == nil {
+		user, err = app.store.Users.GetUserByID(ctx, int64(userID))
+		if err != nil {
+			return nil, err
+		}
+
+		err = app.cacheStore.Users.Set(ctx, user)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
 }

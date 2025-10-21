@@ -8,6 +8,7 @@ import (
 	"github.com/MohummedSoliman/social/internal/auth"
 	"github.com/MohummedSoliman/social/internal/mailer"
 	"github.com/MohummedSoliman/social/internal/store"
+	"github.com/MohummedSoliman/social/internal/store/cache"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -18,6 +19,7 @@ type application struct {
 	db            dbConfig
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	cacheStore    cache.Storage
 }
 
 type config struct {
@@ -25,6 +27,14 @@ type config struct {
 	mail        mailConfig
 	frontendURL string
 	auth        authConfig
+	redisConfig redisConfig
+}
+
+type redisConfig struct {
+	addr     string
+	password string
+	db       int
+	enabled  bool
 }
 
 type authConfig struct {
