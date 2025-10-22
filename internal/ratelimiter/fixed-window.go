@@ -41,5 +41,7 @@ func (l *FixedWindowLimiter) Allow(ip string) (bool, time.Duration) {
 
 func (l *FixedWindowLimiter) resetCount(ip string) {
 	time.Sleep(l.window)
+	l.Lock()
 	delete(l.clients, ip)
+	l.Unlock()
 }

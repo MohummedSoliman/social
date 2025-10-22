@@ -17,6 +17,7 @@ import (
 	"github.com/MohummedSoliman/social/internal/store/cache"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type application struct {
@@ -85,6 +86,14 @@ func (app *application) mount() http.Handler {
 	mux.Use(middleware.RequestID)
 	mux.Use(middleware.Recoverer)
 	mux.Use(middleware.Logger)
+	mux.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://*", "https://*"},
+		AllowedMethods:   []string{"GET", "POST", "POST", "PUT", "OPTIONS", "DELETE"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
 	mux.Use(app.RateLimiterMiddleware)
 
 	mux.Use(middleware.Timeout(60 * time.Second))
