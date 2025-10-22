@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -136,31 +135,31 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (app *application) postContextMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		idParam := chi.URLParam(r, "postID")
+// func (app *application) postContextMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		idParam := chi.URLParam(r, "postID")
 
-		postID, err := strconv.Atoi(idParam)
-		if err != nil {
-			app.internalServerError(w, r, err)
-			return
-		}
+// 		postID, err := strconv.Atoi(idParam)
+// 		if err != nil {
+// 			app.internalServerError(w, r, err)
+// 			return
+// 		}
 
-		post, err := app.store.Posts.GetPostByID(r.Context(), postID)
-		if err != nil {
-			switch {
-			case errors.Is(err, store.ErrNotFound):
-				writeJSONError(w, http.StatusNotFound, err.Error())
-			default:
-				app.internalServerError(w, r, err)
-			}
-			return
-		}
+// 		post, err := app.store.Posts.GetPostByID(r.Context(), postID)
+// 		if err != nil {
+// 			switch {
+// 			case errors.Is(err, store.ErrNotFound):
+// 				writeJSONError(w, http.StatusNotFound, err.Error())
+// 			default:
+// 				app.internalServerError(w, r, err)
+// 			}
+// 			return
+// 		}
 
-		ctx := context.WithValue(r.Context(), POSTKEY, post)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
+// 		ctx := context.WithValue(r.Context(), POSTKEY, post)
+// 		next.ServeHTTP(w, r.WithContext(ctx))
+// 	})
+// }
 
 func getPostFromContext(r *http.Request) *store.Post {
 	post := r.Context().Value(POSTKEY).(*store.Post)

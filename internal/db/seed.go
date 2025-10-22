@@ -24,15 +24,15 @@ var tags = []string{
 	"golang", "backend", "database", "api", "cloud", "docker", "performance",
 }
 
-var comments = []string{
-	"Great work on this!",
-	"I think we should review this part.",
-	"Looks good to me.",
-	"Can we optimize this section?",
-	"Please double-check the logic here.",
-	"Nice improvement over the last version.",
-	"Let’s discuss this in the next meeting.",
-}
+// var comments = []string{
+// 	"Great work on this!",
+// 	"I think we should review this part.",
+// 	"Looks good to me.",
+// 	"Can we optimize this section?",
+// 	"Please double-check the logic here.",
+// 	"Nice improvement over the last version.",
+// 	"Let’s discuss this in the next meeting.",
+// }
 
 const numberOfSeedData = 7
 
