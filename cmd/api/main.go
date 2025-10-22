@@ -8,6 +8,7 @@ import (
 	"github.com/MohummedSoliman/social/internal/db"
 	"github.com/MohummedSoliman/social/internal/env"
 	"github.com/MohummedSoliman/social/internal/mailer"
+	"github.com/MohummedSoliman/social/internal/ratelimiter"
 	"github.com/MohummedSoliman/social/internal/store"
 	"github.com/MohummedSoliman/social/internal/store/cache"
 	"github.com/go-redis/redis/v8"
@@ -52,6 +53,17 @@ func main() {
 		log.Println("redis connection establish successfully")
 	}
 
+	rateLimiterCfg := ratelimiter.Config{
+		RequestsPerTimeFrame: env.GetInt("RATELIMITER_REQUESTS_COUNT", 20),
+		TimeFrame:            time.Second * 5,
+		Enabled:              env.GetBool("RATELIMITER_ENABLED", true),
+	}
+
+	ratelimiter := ratelimiter.NewFixedWindowLimiter(
+		rateLimiterCfg.RequestsPerTimeFrame,
+		rateLimiterCfg.TimeFrame,
+	)
+
 	store := store.NewStorage(db)
 
 	mailer := mailer.NewSendgrid(mailCfg.sendGrid.apiKey, mailCfg.sendGrid.fromEmail)
@@ -78,12 +90,14 @@ func main() {
 				token: token,
 			},
 			redisConfig: redisConfig,
+			rateLimiter: rateLimiterCfg,
 		},
 		db:            cfg,
 		store:         store,
 		cacheStore:    cache.NewRedisStorage(rdsDB),
 		mailer:        mailer,
 		authenticator: jwtAuthenticator,
+		ratelimiter:   ratelimiter,
 	}
 
 	mux := app.mount()
